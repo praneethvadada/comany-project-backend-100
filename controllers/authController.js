@@ -2,7 +2,7 @@ const { User } = require('../models');
 const { generateToken } = require('../utils/jwtHelper');
 const emailService = require('../utils/emailService');
 const otpService = require('../utils/otpService');
-const { 
+const {
   sendSuccess, 
   sendCreated, 
   sendBadRequest, 
