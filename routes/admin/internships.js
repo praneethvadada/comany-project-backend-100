@@ -129,6 +129,17 @@ router.get('/branches/:branchId/internship-domains',
 //   safeRoute(internshipDomainController, 'createInternshipDomain', 'Create internship domain')
 // );
 
+// Add these new routes
+router.get('/branches/:branchId/structure',
+  validateParams(paramSchemas.branchId),
+  safeRoute(branchController, 'getBranchStructure', 'Get branch structure')
+);
+
+router.get('/branches/:branchId/internships',
+  validateParams(paramSchemas.branchId),
+  safeRoute(internshipController, 'getInternshipsByBranch', 'Get internships by branch')
+);
+
 router.get('/branches/:branchId/internship-domains',
   validateParams(internshipParamSchemas.branchId),  // <-- This validates the URL parameter
   safeRoute(internshipDomainController, 'getDomainsByBranch', 'Get domains by branch')
@@ -147,9 +158,9 @@ router.delete('/internship-domains/:id',
 // =============================================================================
 // INTERNSHIP ROUTES
 // =============================================================================
-// router.get('/internships',
-//   safeRoute(internshipController, 'getAllInternships', 'Get all internships')
-// );
+router.get('/internships',
+  safeRoute(internshipController, 'getAllInternships', 'Get all internships')
+);
 
 router.post('/internships',
   validate(internshipSchemas.createInternship),  // <-- This validates internship data

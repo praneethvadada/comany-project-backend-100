@@ -26,13 +26,22 @@ const internshipParamSchemas = {
 
 // Basic validation schemas for internship data
 const internshipSchemas = {
-  createBranch: Joi.object({
-    name: Joi.string().min(2).max(100).required(),
-    code: Joi.string().min(2).max(20).required(),
-    description: Joi.string().allow('').optional(),
-    isActive: Joi.boolean().optional(),
-    sortOrder: Joi.number().integer().min(0).optional()
-  }),
+//   createBranch: Joi.object({
+//   name: Joi.string().min(2).max(100).required(),
+//   code: Joi.string().min(2).max(20).required(),
+//   description: Joi.string().allow('').optional(),
+//   slug: Joi.string().min(2).max(100).optional(),  // ✅ ADD THIS LINE
+//   isActive: Joi.boolean().optional(),
+//   sortOrder: Joi.number().integer().min(0).optional()
+// }),
+createBranch: Joi.object({
+  name: Joi.string().min(2).max(100).required(),
+  code: Joi.string().min(2).max(20).required(),
+  description: Joi.string().allow('').optional(),
+  hasDomains: Joi.boolean().optional(),  // ✅ Add this field
+  isActive: Joi.boolean().optional(),
+  sortOrder: Joi.number().integer().min(0).optional()
+}),
 
   createInternshipDomain: Joi.object({
     name: Joi.string().min(2).max(100).required(),
@@ -42,26 +51,49 @@ const internshipSchemas = {
     sortOrder: Joi.number().integer().min(0).optional()
   }),
 
+  // createInternship: Joi.object({
+  //   title: Joi.string().min(3).max(200).required(),
+  //   description: Joi.string().min(10).required(),
+  //   shortDescription: Joi.string().max(500).optional(),
+  //   learningOutcomes: Joi.string().min(10).required(),
+  //   topBenefits: Joi.string().optional(),
+  //   realTimeProjects: Joi.string().optional(),
+  //   startDate: Joi.date().iso().required(),
+  //   endDate: Joi.date().iso().greater(Joi.ref('startDate')).required(),
+  //   duration: Joi.string().optional(),
+  //   price: Joi.number().min(0).precision(2).optional(),
+  //   originalPrice: Joi.number().min(0).precision(2).optional(),
+  //   maxLearners: Joi.number().integer().min(1).optional(),
+  //   prerequisites: Joi.string().optional(),
+  //   internshipDomainId: Joi.number().integer().positive().required(),
+  //   isActive: Joi.boolean().optional(),
+  //   isFeatured: Joi.boolean().optional(),
+  //   isComingSoon: Joi.boolean().optional(),
+  //   sortOrder: Joi.number().integer().min(0).optional()
+  // }),
+
   createInternship: Joi.object({
-    title: Joi.string().min(3).max(200).required(),
-    description: Joi.string().min(10).required(),
-    shortDescription: Joi.string().max(500).optional(),
-    learningOutcomes: Joi.string().min(10).required(),
-    topBenefits: Joi.string().optional(),
-    realTimeProjects: Joi.string().optional(),
-    startDate: Joi.date().iso().required(),
-    endDate: Joi.date().iso().greater(Joi.ref('startDate')).required(),
-    duration: Joi.string().optional(),
-    price: Joi.number().min(0).precision(2).optional(),
-    originalPrice: Joi.number().min(0).precision(2).optional(),
-    maxLearners: Joi.number().integer().min(1).optional(),
-    prerequisites: Joi.string().optional(),
-    internshipDomainId: Joi.number().integer().positive().required(),
-    isActive: Joi.boolean().optional(),
-    isFeatured: Joi.boolean().optional(),
-    isComingSoon: Joi.boolean().optional(),
-    sortOrder: Joi.number().integer().min(0).optional()
-  }),
+  title: Joi.string().min(3).max(200).required(),
+  description: Joi.string().min(10).required(),
+  shortDescription: Joi.string().max(500).optional(),
+  learningOutcomes: Joi.string().min(10).required(),
+  topBenefits: Joi.string().optional(),
+  realTimeProjects: Joi.string().optional(),
+  startDate: Joi.date().iso().required(),
+  endDate: Joi.date().iso().greater(Joi.ref('startDate')).required(),
+  duration: Joi.string().optional(),
+  price: Joi.number().min(0).precision(2).optional(),
+  originalPrice: Joi.number().min(0).precision(2).optional(),
+  maxLearners: Joi.number().integer().min(1).optional(),
+  prerequisites: Joi.string().optional(),
+  branchId: Joi.number().integer().positive().required(),           // ✅ Add branchId as required
+  internshipDomainId: Joi.number().integer().positive().optional(), // ✅ Make optional
+  isActive: Joi.boolean().optional(),
+  isFeatured: Joi.boolean().optional(),
+  isComingSoon: Joi.boolean().optional(),
+  sortOrder: Joi.number().integer().min(0).optional()
+}),
+
 
   createInternshipLead: Joi.object({
     fullName: Joi.string().min(2).max(100).required(),

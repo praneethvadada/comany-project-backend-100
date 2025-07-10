@@ -1,7 +1,6 @@
 // models/index.js - Updated with Internship System
 const sequelize = require('../config/database');
 
-// Import existing models
 const User = require('./User');
 const Domain = require('./Domain');
 const SubDomain = require('./SubDomain');
@@ -9,7 +8,6 @@ const Project = require('./Project');
 const Lead = require('./Lead');
 const Image = require('./Image');
 
-// Import new internship models
 const Branch = require('./Branch');
 const InternshipDomain = require('./InternshipDomain');
 const Internship = require('./Internship');
@@ -44,6 +42,8 @@ Lead.belongsTo(Project, { foreignKey: 'projectId', as: 'project' });
 Branch.hasMany(InternshipDomain, { foreignKey: 'branchId', as: 'internshipDomains' });
 InternshipDomain.belongsTo(Branch, { foreignKey: 'branchId', as: 'branch' });
 
+Internship.belongsTo(Branch, { foreignKey: 'branchId', as: 'branch' });
+Branch.hasMany(Internship, { foreignKey: 'branchId', as: 'internships' });
 // InternshipDomain -> Internship relationships
 InternshipDomain.hasMany(Internship, { foreignKey: 'internshipDomainId', as: 'internships' });
 Internship.belongsTo(InternshipDomain, { foreignKey: 'internshipDomainId', as: 'internshipDomain' });

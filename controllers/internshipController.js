@@ -4,6 +4,187 @@ const { sendSuccess, sendError, sendBadRequest, sendNotFound, sendServerError } 
 const { Op } = require('sequelize');
 
 class InternshipController {
+
+  // Add this method to internshipController
+async getInternshipsByBranch(req, res) {
+  try {
+    const { branchId } = req.params;
+    const { page = 1, limit = 10 } = req.query;
+    
+    const branch = await Branch.findByPk(branchId);
+    if (!branch) {
+      return sendNotFound(res, 'Branch not found');
+    }
+
+    const offset = (page - 1) * limit;
+
+    if (branch.hasDomains) {
+      // Return domains with their internships
+      const domains = await InternshipDomain.findAll({
+        where: { branchId },
+        include: [
+          {
+            model: Internship,
+            as: 'internships',
+            where: { isActive: true },
+            required: false,
+            limit: parseInt(limit),
+            offset: parseInt(offset)
+          }
+        ],
+        order: [['sortOrder', 'ASC'], ['name', 'ASC']]
+      });
+
+      sendSuccess(res, 'Branch domains and internships fetched successfully', {
+        branchType: 'withDomains',
+        branch: {
+          id: branch.id,
+          name: branch.name,
+          code: branch.code
+        },
+        domains
+      });
+    } else {
+      // Return internships directly
+      const { count, rows: internships } = await Internship.findAndCountAll({
+        where: { 
+          branchId,
+          internshipDomainId: null,
+          isActive: true
+        },
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        order: [['sortOrder', 'ASC'], ['createdAt', 'DESC']]
+      });
+
+      const totalPages = Math.ceil(count / limit);
+
+      sendSuccess(res, 'Branch internships fetched successfully', {
+        branchType: 'directInternships',
+        branch: {
+          id: branch.id,
+          name: branch.name,
+          code: branch.code
+        },
+        internships,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages,
+          totalItems: count,
+          itemsPerPage: parseInt(limit)
+        }
+      });
+    }
+  } catch (error) {
+    console.error('InternshipController: Get internships by branch error:', error);
+    sendServerError(res, 'Failed to fetch branch internships');
+  }
+}
+
+// Update the existing createInternship method
+async createInternship(req, res) {
+  try {
+    const {
+      title,
+      description,
+      shortDescription,
+      learningOutcomes,
+      topBenefits,
+      realTimeProjects,
+      startDate,
+      endDate,
+      duration,
+      price,
+      originalPrice,
+      maxLearners,
+      prerequisites,
+      branchId,          // ✅ Add branchId as required
+      internshipDomainId, // ✅ Make this optional
+      isActive = true,
+      isFeatured = false,
+      isComingSoon = false,
+      sortOrder = 0
+    } = req.body;
+
+    // Check if branch exists
+    const branch = await Branch.findByPk(branchId);
+    if (!branch) {
+      return sendBadRequest(res, 'Branch not found');
+    }
+
+    // Validate domain logic
+    if (branch.hasDomains) {
+      // Branch uses domains - domain is required
+      if (!internshipDomainId) {
+        return sendBadRequest(res, 'Internship domain is required for this branch');
+      }
+      
+      const domain = await InternshipDomain.findByPk(internshipDomainId);
+      if (!domain || domain.branchId !== parseInt(branchId)) {
+        return sendBadRequest(res, 'Invalid internship domain for this branch');
+      }
+    } else {
+      // Branch doesn't use domains - domain should be null
+      if (internshipDomainId) {
+        return sendBadRequest(res, 'This branch does not use domains. Remove internshipDomainId');
+      }
+    }
+
+    // Validate dates
+    if (new Date(startDate) >= new Date(endDate)) {
+      return sendBadRequest(res, 'End date must be after start date');
+    }
+
+    const internship = await Internship.create({
+      title,
+      description,
+      shortDescription,
+      learningOutcomes,
+      topBenefits,
+      realTimeProjects,
+      startDate,
+      endDate,
+      duration,
+      price,
+      originalPrice,
+      maxLearners,
+      prerequisites,
+      branchId,                    // ✅ Always set branchId
+      internshipDomainId: internshipDomainId || null, // ✅ Null for direct branch internships
+      isActive,
+      isFeatured,
+      isComingSoon,
+      sortOrder
+    });
+
+    // Fetch with relationships
+    const internshipWithDetails = await Internship.findByPk(internship.id, {
+      include: [
+        {
+          model: InternshipDomain,
+          as: 'internshipDomain',
+          required: false,
+          include: [
+            {
+              model: Branch,
+              as: 'branch'
+            }
+          ]
+        },
+        {
+          model: Branch,
+          as: 'branch'  // ✅ Add direct branch relationship
+        }
+      ]
+    });
+
+    sendSuccess(res, 'Internship created successfully', internshipWithDetails, 201);
+  } catch (error) {
+    console.error('InternshipController: Create internship error:', error);
+    sendServerError(res, 'Failed to create internship');
+  }
+}
+
   // Get all internships with pagination and filtering
   async getAllInternships(req, res) {
     try {

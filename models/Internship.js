@@ -90,7 +90,7 @@ const Internship = sequelize.define('Internship', {
   },
   internshipDomainId: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
     references: {
       model: 'internship_domains',
       key: 'id'

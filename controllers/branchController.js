@@ -4,6 +4,65 @@ const { sendSuccess, sendError, sendBadRequest, sendNotFound, sendServerError } 
 const { Op } = require('sequelize');
 
 class BranchController {
+  // Add this new method to branchController
+async getBranchStructure(req, res) {
+  try {
+    const { id } = req.params;
+    
+    const branch = await Branch.findByPk(id);
+    if (!branch) {
+      return sendNotFound(res, 'Branch not found');
+    }
+
+    let response = {
+      id: branch.id,
+      name: branch.name,
+      code: branch.code,
+      hasDomains: branch.hasDomains
+    };
+
+    if (branch.hasDomains) {
+      // Get domains with internship counts
+      const domains = await InternshipDomain.findAll({
+        where: { branchId: id },
+        include: [
+          {
+            model: Internship,
+            as: 'internships',
+            attributes: ['id'],
+            where: { isActive: true },
+            required: false
+          }
+        ]
+      });
+      
+      response.domains = domains.map(domain => ({
+        id: domain.id,
+        name: domain.name,
+        description: domain.description,
+        internshipCount: domain.internships ? domain.internships.length : 0
+      }));
+    } else {
+      // Get direct internships count
+      const internshipCount = await Internship.count({
+        where: { 
+          branchId: id,
+          internshipDomainId: null,
+          isActive: true
+        }
+      });
+      
+      response.directInternshipCount = internshipCount;
+    }
+
+    sendSuccess(res, 'Branch structure fetched successfully', response);
+  } catch (error) {
+    console.error('BranchController: Get branch structure error:', error);
+    sendServerError(res, 'Failed to fetch branch structure');
+  }
+}
+
+
   // Get all branches with optional filters
   async getAllBranches(req, res) {
     try {
@@ -129,30 +188,70 @@ class BranchController {
   }
 
   // Create new branch
-  async createBranch(req, res) {
-    try {
-      const { name, code, description, isActive = true, sortOrder = 0 } = req.body;
+  // async createBranch(req, res) {
+  //   try {
+  //     const { name, code, description, isActive = true, sortOrder = 0 } = req.body;
 
-      // Check if branch with same code exists
-      const existingBranch = await Branch.findOne({ where: { code } });
-      if (existingBranch) {
-        return sendBadRequest(res, 'Branch with this code already exists');
-      }
+  //     // Check if branch with same code exists
+  //     const existingBranch = await Branch.findOne({ where: { code } });
+  //     if (existingBranch) {
+  //       return sendBadRequest(res, 'Branch with this code already exists');
+  //     }
 
-      const branch = await Branch.create({
-        name,
-        code: code.toUpperCase(),
-        description,
-        isActive,
-        sortOrder
-      });
+  //     const branch = await Branch.create({
+  //       name,
+  //       code: code.toUpperCase(),
+  //       description,
+  //       isActive,
+  //       sortOrder
+  //     });
 
-      sendSuccess(res, 'Branch created successfully', branch, 201);
-    } catch (error) {
-      console.error('BranchController: Create branch error:', error);
-      sendServerError(res, 'Failed to create branch');
+  //     sendSuccess(res, 'Branch created successfully', branch, 201);
+  //   } catch (error) {
+  //     console.error('BranchController: Create branch error:', error);
+  //     sendServerError(res, 'Failed to create branch');
+  //   }
+  // }
+
+  // REPLACE this method in your controllers/branchController.js
+async createBranch(req, res) {
+  try {
+    const { name, code, description, isActive = true, sortOrder = 0 } = req.body;
+
+    console.log('🏢 BRANCH CREATE - Input data:', { name, code, description, isActive, sortOrder });
+
+    // Check if branch with same code exists
+    const existingBranch = await Branch.findOne({ where: { code: code.toUpperCase() } });
+    if (existingBranch) {
+      return sendBadRequest(res, 'Branch with this code already exists');
     }
+
+    // ✅ MANUALLY GENERATE SLUG (since hook isn't working)
+    const slug = name
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '')           // Remove special characters except hyphens and underscores
+      .replace(/[\s_-]+/g, '-')           // Replace spaces, underscores, and multiple hyphens with single hyphen
+      .replace(/^-+|-+$/g, '');           // Remove leading and trailing hyphens
+
+    console.log('🔗 BRANCH CREATE - Generated slug:', slug, 'from name:', name);
+
+    const branch = await Branch.create({
+      name,
+      code: code.toUpperCase(),
+      description,
+      slug,                               // ✅ EXPLICITLY SET SLUG
+      isActive,
+      sortOrder
+    });
+
+    console.log('✅ BRANCH CREATE - Success:', branch.toJSON());
+    sendSuccess(res, 'Branch created successfully', branch, 201);
+  } catch (error) {
+    console.error('❌ BRANCH CREATE - Error:', error);
+    sendServerError(res, 'Failed to create branch');
   }
+}
 
   // Update branch
   async updateBranch(req, res) {
