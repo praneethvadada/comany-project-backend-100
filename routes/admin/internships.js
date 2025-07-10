@@ -125,9 +125,10 @@ router.get('/branches/:branchId/internship-domains',
   safeRoute(internshipDomainController, 'getDomainsByBranch', 'Get domains by branch')
 );
 
-// router.post('/internship-domains',
-//   safeRoute(internshipDomainController, 'createInternshipDomain', 'Create internship domain')
-// );
+router.post('/internship-domains',
+  validate(internshipSchemas.createInternshipDomain),
+  safeRoute(internshipDomainController, 'createInternshipDomain', 'Create internship domain')
+);
 
 // Add these new routes
 router.get('/branches/:branchId/structure',

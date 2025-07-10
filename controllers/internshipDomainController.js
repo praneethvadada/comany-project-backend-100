@@ -172,50 +172,334 @@ class InternshipDomainController {
   }
 
   // Create new internship domain
-  async createInternshipDomain(req, res) {
-    try {
-      const { name, description, branchId, isActive = true, sortOrder = 0 } = req.body;
+  // async createInternshipDomain(req, res) {
+  //   try {
+  //     const { name, description, branchId, isActive = true, sortOrder = 0 } = req.body;
 
-      // Check if branch exists
-      const branch = await Branch.findByPk(branchId);
-      if (!branch) {
-        return sendBadRequest(res, 'Branch not found');
-      }
+  //     // Check if branch exists
+  //     const branch = await Branch.findByPk(branchId);
+  //     if (!branch) {
+  //       return sendBadRequest(res, 'Branch not found');
+  //     }
 
-      // Check if domain with same name exists in this branch
-      const existingDomain = await InternshipDomain.findOne({ 
-        where: { 
-          name,
-          branchId
-        } 
-      });
-      if (existingDomain) {
-        return sendBadRequest(res, 'Domain with this name already exists in this branch');
-      }
+  //     // Check if domain with same name exists in this branch
+  //     const existingDomain = await InternshipDomain.findOne({ 
+  //       where: { 
+  //         name,
+  //         branchId
+  //       } 
+  //     });
+  //     if (existingDomain) {
+  //       return sendBadRequest(res, 'Domain with this name already exists in this branch');
+  //     }
 
-      const domain = await InternshipDomain.create({
-        name,
-        description,
-        branchId,
-        isActive,
-        sortOrder
-      });
+  //     const domain = await InternshipDomain.create({
+  //       name,
+  //       description,
+  //       branchId,
+  //       isActive,
+  //       sortOrder
+  //     });
 
-      const domainWithBranch = await InternshipDomain.findByPk(domain.id, {
-        include: [
-          {
-            model: Branch,
-            as: 'branch'
-          }
-        ]
-      });
+  //     const domainWithBranch = await InternshipDomain.findByPk(domain.id, {
+  //       include: [
+  //         {
+  //           model: Branch,
+  //           as: 'branch'
+  //         }
+  //       ]
+  //     });
 
-      sendSuccess(res, 'Internship domain created successfully', domainWithBranch, 201);
-    } catch (error) {
-      console.error('InternshipDomainController: Create domain error:', error);
-      sendServerError(res, 'Failed to create internship domain');
+  //     sendSuccess(res, 'Internship domain created successfully', domainWithBranch, 201);
+  //   } catch (error) {
+  //     console.error('InternshipDomainController: Create domain error:', error);
+  //     sendServerError(res, 'Failed to create internship domain');
+  //   }
+  // }
+
+
+
+  //  async createInternshipDomain(req, res) {
+  //   try {
+  //     console.log('🔄 Creating internship domain with data:', req.body);
+      
+  //     const { name, description, branchId, isActive = true, sortOrder = 0 } = req.body;
+
+  //     // Check if branch exists
+  //     const branch = await Branch.findByPk(branchId);
+  //     if (!branch) {
+  //       console.log('❌ Branch not found:', branchId);
+  //       return sendBadRequest(res, 'Branch not found');
+  //     }
+
+  //     // Check if domain with same name exists in this branch
+  //     const existingDomain = await InternshipDomain.findOne({ 
+  //       where: { 
+  //         name,
+  //         branchId
+  //       } 
+  //     });
+      
+  //     if (existingDomain) {
+  //       console.log('❌ Domain already exists:', name, 'in branch:', branchId);
+  //       return sendBadRequest(res, 'Domain with this name already exists in this branch');
+  //     }
+
+  //     // Create the domain
+  //     const domain = await InternshipDomain.create({
+  //       name,
+  //       description,
+  //       branchId,
+  //       isActive,
+  //       sortOrder
+  //     });
+
+  //     console.log('✅ Domain created successfully:', domain.id);
+
+  //     // Fetch the domain with branch info
+  //     const domainWithBranch = await InternshipDomain.findByPk(domain.id, {
+  //       include: [
+  //         {
+  //           model: Branch,
+  //           as: 'branch'
+  //         }
+  //       ]
+  //     });
+
+  //     sendSuccess(res, 'Internship domain created successfully', domainWithBranch, 201);
+  //   } catch (error) {
+  //     console.error('❌ InternshipDomainController: Create domain error:', error);
+  //     console.error('❌ Error stack:', error.stack);
+  //     sendServerError(res, 'Failed to create internship domain');
+  //   }
+  // }
+
+
+//   async createInternshipDomain(req, res) {
+//   try {
+//     console.log('🔄 Creating internship domain with data:', req.body);
+    
+//     const { name, description, branchId, isActive = true, sortOrder = 0 } = req.body;
+
+//     // Check if branch exists
+//     const branch = await Branch.findByPk(branchId);
+//     if (!branch) {
+//       console.log('❌ Branch not found:', branchId);
+//       return sendBadRequest(res, 'Branch not found');
+//     }
+
+//     // ✅ GENERATE SLUG FROM NAME
+//     const generateSlug = (text) => {
+//       return text
+//         .toLowerCase()
+//         .trim()
+//         .replace(/[^\w\s-]/g, '') // Remove special characters
+//         .replace(/[\s_-]+/g, '-') // Replace spaces and underscores with hyphens
+//         .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+//     };
+
+//     const baseSlug = generateSlug(name);
+//     let slug = baseSlug;
+
+//     // ✅ ENSURE SLUG IS UNIQUE WITHIN THE BRANCH
+//     let counter = 1;
+//     while (true) {
+//       const existingDomainWithSlug = await InternshipDomain.findOne({
+//         where: { 
+//           slug,
+//           branchId
+//         }
+//       });
+      
+//       if (!existingDomainWithSlug) {
+//         break; // Slug is unique
+//       }
+      
+//       slug = `${baseSlug}-${counter}`;
+//       counter++;
+//     }
+
+//     // Check if domain with same name exists in this branch
+//     const existingDomain = await InternshipDomain.findOne({ 
+//       where: { 
+//         name,
+//         branchId
+//       } 
+//     });
+    
+//     if (existingDomain) {
+//       console.log('❌ Domain already exists:', name, 'in branch:', branchId);
+//       return sendBadRequest(res, 'Domain with this name already exists in this branch');
+//     }
+
+//     // ✅ CREATE THE DOMAIN WITH SLUG
+//     const domain = await InternshipDomain.create({
+//       name,
+//       description,
+//       slug, // ✅ Include the generated slug
+//       branchId,
+//       isActive,
+//       sortOrder
+//     });
+
+//     console.log('✅ Domain created successfully with slug:', domain.id, '- slug:', slug);
+
+//     // Fetch the domain with branch info
+//     const domainWithBranch = await InternshipDomain.findByPk(domain.id, {
+//       include: [
+//         {
+//           model: Branch,
+//           as: 'branch'
+//         }
+//       ]
+//     });
+
+//     sendSuccess(res, 'Internship domain created successfully', domainWithBranch, 201);
+//   } catch (error) {
+//     console.error('❌ InternshipDomainController: Create domain error:', error);
+//     console.error('❌ Error stack:', error.stack);
+//     sendServerError(res, 'Failed to create internship domain');
+//   }
+// }
+
+
+// async createInternshipDomain(req, res) {
+//   try {
+//     console.log('🔄 Creating internship domain with data:', req.body);
+    
+//     const { name, description, branchId, isActive = true, sortOrder = 0 } = req.body;
+
+//     // Check if branch exists
+//     const branch = await Branch.findByPk(branchId);
+//     if (!branch) {
+//       console.log('❌ Branch not found:', branchId);
+//       return sendBadRequest(res, 'Branch not found');
+//     }
+
+//     // ✅ GENERATE UNIQUE SLUG (handles duplication automatically)
+//     const generateSlug = (text) => {
+//       return text
+//         .toLowerCase()
+//         .trim()
+//         .replace(/[^\w\s-]/g, '') 
+//         .replace(/[\s_-]+/g, '-') 
+//         .replace(/^-+|-+$/g, '');
+//     };
+
+//     const baseSlug = generateSlug(name);
+//     let slug = baseSlug;
+//     let counter = 1;
+
+//     // Ensure slug is unique within the branch
+//     while (true) {
+//       const existingDomainWithSlug = await InternshipDomain.findOne({
+//         where: { slug, branchId }
+//       });
+      
+//       if (!existingDomainWithSlug) {
+//         break; // Slug is unique
+//       }
+      
+//       slug = `${baseSlug}-${counter}`;
+//       counter++;
+//     }
+
+//     // ✅ REMOVED: Name duplication check - allow duplicate names
+//     // This allows users to create "AI", "AI" (becomes ai-1), "AI" (becomes ai-2)
+    
+//     // Create the domain with unique slug
+//     const domain = await InternshipDomain.create({
+//       name,
+//       description,
+//       slug,
+//       branchId,
+//       isActive,
+//       sortOrder
+//     });
+
+//     console.log('✅ Domain created successfully:', domain.id, 'with slug:', slug);
+
+//     // Fetch the domain with branch info
+//     const domainWithBranch = await InternshipDomain.findByPk(domain.id, {
+//       include: [{ model: Branch, as: 'branch' }]
+//     });
+
+//     sendSuccess(res, 'Internship domain created successfully', domainWithBranch, 201);
+//   } catch (error) {
+//     console.error('❌ InternshipDomainController: Create domain error:', error);
+//     sendServerError(res, 'Failed to create internship domain');
+//   }
+// }
+
+
+async createInternshipDomain(req, res) {
+  try {
+    console.log('🔄 Creating internship domain with data:', req.body);
+    
+    const { name, description, branchId, isActive = true, sortOrder = 0 } = req.body;
+
+    // Check if branch exists
+    const branch = await Branch.findByPk(branchId);
+    if (!branch) {
+      console.log('❌ Branch not found:', branchId);
+      return sendBadRequest(res, 'Branch not found');
     }
+
+    // ✅ GENERATE UNIQUE SLUG (handles duplication automatically)
+    const generateSlug = (text) => {
+      return text
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, '') 
+        .replace(/[\s_-]+/g, '-') 
+        .replace(/^-+|-+$/g, '');
+    };
+
+    const baseSlug = generateSlug(name);
+    let slug = baseSlug;
+    let counter = 1;
+
+    // Ensure slug is unique within the branch
+    while (true) {
+      const existingDomainWithSlug = await InternshipDomain.findOne({
+        where: { slug, branchId }
+      });
+      
+      if (!existingDomainWithSlug) {
+        break; // Slug is unique
+      }
+      
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+
+    // ✅ REMOVED: Name duplication check - allow duplicate names
+    
+    // Create the domain with unique slug
+    const domain = await InternshipDomain.create({
+      name,
+      description,
+      slug,
+      branchId,
+      isActive,
+      sortOrder
+    });
+
+    console.log('✅ Domain created successfully:', domain.id, 'with slug:', slug);
+
+    // Fetch the domain with branch info
+    const domainWithBranch = await InternshipDomain.findByPk(domain.id, {
+      include: [{ model: Branch, as: 'branch' }]
+    });
+
+    sendSuccess(res, 'Internship domain created successfully', domainWithBranch, 201);
+  } catch (error) {
+    console.error('❌ InternshipDomainController: Create domain error:', error);
+    sendServerError(res, 'Failed to create internship domain');
   }
+}
+
+
 
   // Update internship domain
   async updateInternshipDomain(req, res) {

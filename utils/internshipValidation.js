@@ -43,10 +43,34 @@ createBranch: Joi.object({
   sortOrder: Joi.number().integer().min(0).optional()
 }),
 
+  // createInternshipDomain: Joi.object({
+  //   name: Joi.string().min(2).max(100).required(),
+  //   description: Joi.string().allow('').optional(),
+  //   branchId: Joi.number().integer().positive().required(),
+  //   isActive: Joi.boolean().optional(),
+  //   sortOrder: Joi.number().integer().min(0).optional()
+  // }),
+//   createInternshipDomain: Joi.object({
+//   name: Joi.string().min(2).max(100).required(),
+//   description: Joi.string().max(500).optional().allow(''),
+//   branchId: Joi.number().integer().positive().required(),
+//   isActive: Joi.boolean().default(true),
+//   sortOrder: Joi.number().integer().min(0).default(0)
+// }),
+
+
   createInternshipDomain: Joi.object({
     name: Joi.string().min(2).max(100).required(),
-    description: Joi.string().allow('').optional(),
+    description: Joi.string().max(500).optional().allow(''),
     branchId: Joi.number().integer().positive().required(),
+    isActive: Joi.boolean().default(true),
+    sortOrder: Joi.number().integer().min(0).default(0)
+  }),
+
+  updateInternshipDomain: Joi.object({
+    name: Joi.string().min(2).max(100).optional(),
+    description: Joi.string().max(500).optional().allow(''),
+    branchId: Joi.number().integer().positive().optional(),
     isActive: Joi.boolean().optional(),
     sortOrder: Joi.number().integer().min(0).optional()
   }),

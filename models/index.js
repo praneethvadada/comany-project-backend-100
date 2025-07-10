@@ -39,7 +39,9 @@ Lead.belongsTo(Project, { foreignKey: 'projectId', as: 'project' });
 // =============================================================================
 
 // Branch -> InternshipDomain relationships
+// Branch.hasMany(InternshipDomain, { foreignKey: 'branchId', as: 'internshipDomains' });
 Branch.hasMany(InternshipDomain, { foreignKey: 'branchId', as: 'internshipDomains' });
+
 InternshipDomain.belongsTo(Branch, { foreignKey: 'branchId', as: 'branch' });
 
 Internship.belongsTo(Branch, { foreignKey: 'branchId', as: 'branch' });
